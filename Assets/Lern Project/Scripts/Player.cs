@@ -11,9 +11,11 @@ namespace LernProject
         public Transform spawnPosition;
         private bool _isSpawnShield;
         private int level = 1;
+        private bool _isSprint;
 
         private Vector3 _direction;
         public float speed = 2f;
+        public float speedRotate = 20f;
 
         void Start()
         {
@@ -28,6 +30,8 @@ namespace LernProject
 
             _direction.x = (Input.GetAxis("Horizontal"));
             _direction.z = (Input.GetAxis("Vertical"));
+
+            _isSprint = Input.GetButton("Sprint");
         }
 
         private void FixedUpdate()
@@ -39,6 +43,8 @@ namespace LernProject
             }
 
             Move(Time.fixedDeltaTime);
+
+            transform.Rotate(new Vector3(0, Input.GetAxis("Mouse X") * speedRotate * Time.fixedDeltaTime, 0));
         }
 
         private void SpawnShield()
@@ -46,10 +52,13 @@ namespace LernProject
             var shieldObj = Instantiate(shieldPrefab, spawnPosition.position, spawnPosition.rotation);
             var shield = shieldObj.GetComponent<Shield>();
             shield.Init(10 * level);
+            shieldObj.transform.SetParent(spawnPosition);       
         }
+       
         private void Move(float delta)
         {
-            transform.position += _direction * speed * delta;
+            var fixedDirection = transform.TransformDirection(_direction.normalized);
+            transform.position += fixedDirection * (_isSprint ? speed * 2 : speed) * delta;
         }
     }
 }
